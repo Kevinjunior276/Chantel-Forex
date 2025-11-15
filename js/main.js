@@ -1,0 +1,309 @@
+(function ($) {
+    "use strict";
+
+    // Options d'investissement
+       const fcfa24hOptions = [
+        { amount: 20000, rendement: 90000 },
+        { amount: 30000, rendement: 140000 },
+        { amount: 40000, rendement: 180000 },
+        { amount: 50000, rendement: 220000 },
+        { amount: 80000, rendement: 340000 },
+        { amount: 100000, rendement: 420000 },
+        { amount: 150000, rendement: 670000 },
+        { amount: 200000, rendement: 870000 },
+        { amount: 250000, rendement: 1300000 },
+        { amount: 300000, rendement: 1500000 },
+        { amount: 350000, rendement: 2000000 }
+    ];
+
+    const fcfa48hOptions = [
+        { amount: 20000, rendement: 150000 },
+        { amount: 30000, rendement: 230000 },
+        { amount: 40000, rendement: 310000 },
+        { amount: 50000, rendement: 380000 },
+        { amount: 80000, rendement: 430000 },
+        { amount: 100000, rendement: 500000 },
+        { amount: 150000, rendement: 690000 },
+        { amount: 200000, rendement: 910000 },
+        { amount: 250000, rendement: 1370000 },
+        { amount: 300000, rendement: 1500000 },
+        { amount: 350000, rendement: 2500000 }
+    ];
+
+    // Fonction pour mettre à jour le préfixe téléphonique et le modèle de validation
+    function updatePhonePrefix() {
+        const countrySelect = document.getElementById('country');
+        const phoneInput = document.getElementById('phone');
+        const prefixSpan = document.getElementById('country-prefix');
+        const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+        
+        if (selectedOption.dataset.prefix) {
+            const prefix = selectedOption.dataset.prefix;
+            prefixSpan.textContent = prefix;
+            
+            // Mettre à jour le modèle de validation en fonction du pays
+            const country = selectedOption.value;
+            
+            // Mettre à jour le placeholder avec l'exemple de numéro
+            const example = getPhoneExample(country);
+            phoneInput.title = `Format attendu: ${prefix} ${example}`;
+            phoneInput.placeholder = `Ex: ${example}`;
+            
+            // Mettre à jour le texte d'aide
+            const helpText = phoneInput.nextElementSibling;
+            if (helpText && helpText.classList.contains('form-text')) {
+                helpText.textContent = `Exemple: ${example}`;
+            }
+            
+            // Réinitialiser les classes de validation
+            phoneInput.classList.remove('is-valid', 'is-invalid');
+            
+            // Déclencher la validation si un numéro est déjà saisi
+            if (phoneInput.value) {
+                const event = new Event('input');
+                phoneInput.dispatchEvent(event);
+            }
+        } else {
+            // Si aucun pays n'est sélectionné, réinitialiser les champs
+            phoneInput.value = '';
+            phoneInput.placeholder = 'Sélectionnez d\'abord un pays';
+            phoneInput.classList.remove('is-valid', 'is-invalid');
+        }
+    }
+    
+    // Fonction pour obtenir un exemple de numéro par pays
+    function getPhoneExample(country) {
+        const examples = {
+            'Cameroun': '6 12 34 56 78',
+            'Côte d\'Ivoire': '01 23 45 67',
+            'Sénégal': '77 123 45 67',
+            'Burkina Faso': '70 12 34 56',
+            'Mali': '65 12 34 56',
+            'Togo': '90 12 34 56',
+            'Tchad': '63 01 23 45',
+            'Gabon': '06 01 23 45',
+            'Congo Brazzaville': '05 123 4567'
+        };
+        return examples[country] || '12345678';
+    }
+    
+    // Fonction pour valider un numéro de téléphone selon le pays
+    function validatePhoneNumber(phoneNumber, country) {
+        const phone = phoneNumber.replace(/\D/g, ''); // Supprimer tout ce qui n'est pas un chiffre
+        
+        // Vérifier la longueur minimale
+        if (phone.length < 8) return false;
+        
+        // Validation spécifique par pays
+        switch(country) {
+            case 'Cameroun':
+                return /^[2367]\d{7,8}$/.test(phone);
+            case 'Côte d\'Ivoire':
+                return /^[0-57-9]\d{7}$/.test(phone);
+            case 'Sénégal':
+                return /^(7[0-9]|30|33|76|77|78)\d{7}$/.test(phone);
+            case 'Burkina Faso':
+            case 'Mali':
+                return /^[67]\d{7}$/.test(phone);
+            case 'Togo':
+                return /^9\d{7}$/.test(phone);
+            case 'Tchad':
+                return /^[679]\d{7}$/.test(phone);
+            case 'Gabon':
+                return /^(0[1-9]|[67]\d)\d{6}$/.test(phone);
+            case 'Congo Brazzaville':
+                return /^0\d{8}$/.test(phone);
+            default:
+                return /^\d{8,10}$/.test(phone);
+        }
+    }
+
+    // Valider le numéro de téléphone lors de la saisie
+    document.getElementById('phone').addEventListener('input', function(e) {
+        const phoneInput = e.target;
+        const countrySelect = document.getElementById('country');
+        const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+        
+        if (!selectedOption.dataset.prefix) {
+            phoneInput.setCustomValidity('Veuillez d\'abord sélectionner un pays');
+            return;
+        }
+        
+        const country = selectedOption.value;
+        const phoneNumber = phoneInput.value;
+        
+        if (validatePhoneNumber(phoneNumber, country)) {
+            phoneInput.setCustomValidity('');
+            phoneInput.classList.remove('is-invalid');
+            phoneInput.classList.add('is-valid');
+        } else {
+            phoneInput.setCustomValidity('Format de numéro invalide pour ' + country);
+            phoneInput.classList.remove('is-valid');
+            phoneInput.classList.add('is-invalid');
+        }
+        
+        // Mettre à jour l'affichage de l'aide
+        const helpText = phoneInput.nextElementSibling;
+        if (helpText && helpText.classList.contains('form-text')) {
+            helpText.textContent = `Exemple: ${getPhoneExample(country)}`;
+        }
+    });
+
+    // Fonction pour formater les nombres avec des espaces
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    }
+
+    // Fonction pour mettre à jour les calculs
+    function updateCalculations() {
+        const amount = parseInt(document.getElementById('amount').value) || 0;
+        const duration = document.querySelector('input[name="duration"]:checked').value;
+        
+        let rendement = 0;
+        const options = duration === '24h' ? fcfa24hOptions : fcfa48hOptions;
+        const selectedOption = options.find(opt => opt.amount === amount);
+        
+        if (selectedOption) {
+            rendement = selectedOption.rendement;
+        }
+        
+        const profit = rendement - amount;
+        
+        document.getElementById('investedAmount').textContent = formatNumber(amount) + ' FCFA';
+        document.getElementById('estimatedProfit').textContent = formatNumber(profit) + ' FCFA';
+        document.getElementById('totalReturn').textContent = formatNumber(rendement) + ' FCFA';
+    }
+
+    // Initialiser la validation au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser la validation du numéro de téléphone
+        const countrySelect = document.getElementById('country');
+        if (countrySelect) {
+            // Déclencher la mise à jour du préfixe au chargement
+            updatePhonePrefix();
+            
+            // Ajouter l'écouteur d'événement pour le changement de pays
+            countrySelect.addEventListener('change', updatePhonePrefix);
+        }
+        
+        // Initialiser les calculs d'investissement si la page contient ces éléments
+        if (document.getElementById('amount') && document.querySelector('input[name="duration"]')) {
+            updateCalculations();
+            
+            // Ajouter les écouteurs d'événements pour les champs d'investissement
+            document.querySelectorAll('input[name="duration"]').forEach(radio => {
+                radio.addEventListener('change', updateCalculations);
+            });
+
+            document.getElementById('amount').addEventListener('change', updateCalculations);
+        }
+    });
+
+    // Gestion de la soumission du formulaire
+    document.getElementById('investmentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Ici, vous pouvez ajouter le code pour envoyer les données du formulaire
+        alert('Votre demande d\'investissement a été soumise avec succès ! Notre équipe vous contactera bientôt.');
+        this.reset();
+        document.getElementById('investedAmount').textContent = '0 FCFA';
+        document.getElementById('estimatedProfit').textContent = '0 FCFA';
+        document.getElementById('totalReturn').textContent = '0 FCFA';
+    });
+    
+    // Initiate the wowjs
+    new WOW().init();
+    
+    
+   // Back to top button
+   $(window).scroll(function () {
+    if ($(this).scrollTop() > 300) {
+        $('.back-to-top').fadeIn('slow');
+    } else {
+        $('.back-to-top').fadeOut('slow');
+    }
+    });
+    $('.back-to-top').click(function () {
+        $('html, body').animate({scrollTop: 0}, 1500, 'easeInOutExpo');
+        return false;
+    });
+
+
+    // Team carousel
+    var $teamCarousel = $(".team-carousel");
+    var teamItems = $teamCarousel.find('.team-item').length;
+    $teamCarousel.owlCarousel({
+        autoplay: true,
+        smartSpeed: 1000,
+        center: false,
+        dots: false,
+        loop: teamItems > 1, // Désactive la boucle si un seul profil
+        margin: 50,
+        nav : true,
+        navText : [
+            '<i class="bi bi-arrow-left"></i>',
+            '<i class="bi bi-arrow-right"></i>'
+        ],
+        responsiveClass: true,
+        responsive: {
+            0:{
+                items:1
+            },
+            768:{
+                items:2
+            },
+            992:{
+                items:3
+            }
+        }
+    });
+
+
+    // Testimonial carousel
+
+    $(".testimonial-carousel").owlCarousel({
+        autoplay: true,
+        smartSpeed: 1500,
+        center: true,
+        dots: true,
+        loop: true,
+        margin: 0,
+        nav : true,
+        navText: false,
+        responsiveClass: true,
+        responsive: {
+            0:{
+                items:1
+            },
+            576:{
+                items:1
+            },
+            768:{
+                items:2
+            },
+            992:{
+                items:3
+            }
+        }
+    });
+
+
+     // Fact Counter
+
+     $(document).ready(function(){
+        $('.counter-value').each(function(){
+            $(this).prop('Counter',0).animate({
+                Counter: $(this).text()
+            },{
+                duration: 2000,
+                easing: 'easeInQuad',
+                step: function (now){
+                    $(this).text(Math.ceil(now));
+                }
+            });
+        });
+    });
+
+
+
+})(jQuery);
+

@@ -1,0 +1,131 @@
+/* Styles pour la section témoignages */
+.testimonial {
+    position: relative;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+/* Styles pour les cartes de témoignage */
+.testimonial-item {
+    padding: 15px;
+    transition: all 0.3s ease;
+}
+
+.testimonial-content {
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.testimonial-item:hover .testimonial-content {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Style de l'avatar */
+.testimonial-avatar img {
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Style des étoiles */
+.testimonial .fa-star {
+    color: #ffc107;
+    margin-right: 3px;
+}
+
+/* Style de la citation */
+.fa-quote-left {
+    font-size: 1.5rem;
+    opacity: 0.7;
+}
+
+/* Navigation du carrousel */
+.owl-nav {
+    position: absolute;
+    top: -70px;
+    right: 0;
+    display: flex;
+    gap: 10px;
+}
+
+.owl-prev, .owl-next {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--grad-green) !important;
+    color: white !important;
+    border-radius: 50% !important;
+    font-size: 1.2rem !important;
+    transition: all 0.3s ease;
+}
+
+.owl-prev:hover, .owl-next:hover {
+    background: var(--grad-purple) !important;
+    transform: translateY(-3px);
+}
+
+/* Points indicateurs */
+.owl-dots {
+    margin-top: 30px !important;
+    text-align: center;
+}
+
+.owl-dot {
+    width: 12px !important;
+    height: 12px !important;
+    margin: 0 5px !important;
+    border-radius: 50% !important;
+    background: #dee2e6 !important;
+    transition: all 0.3s ease;
+}
+
+.owl-dot.active {
+    background: var(--grad-green) !important;
+    transform: scale(1.2);
+}
+
+/* Animation des cartes au survol */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+.testimonial-item:hover {
+    animation: pulse 2s infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .testimonial-item {
+        padding: 10px 5px;
+    }
+    
+    .testimonial-content {
+        padding: 20px 15px !important;
+    }
+    
+    .owl-nav {
+        position: relative;
+        justify-content: center;
+        top: 0;
+        margin: 20px 0;
+    }
+}
+
+/* Effet de flou sur les cartes inactives (pour le mode "center" d'Owl Carousel) */
+.owl-item:not(.center) .testimonial-content {
+    opacity: 0.8;
+    transform: scale(0.95);
+    transition: all 0.3s ease;
+}
+
+.owl-item.center .testimonial-content {
+    opacity: 1;
+    transform: scale(1);
+}
