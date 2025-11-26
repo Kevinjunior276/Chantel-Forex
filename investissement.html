@@ -284,22 +284,36 @@
                                         <select class="form-select mb-3" id="country" name="country" required
                                             onchange="updatePhonePrefix()">
                                             <option value="" disabled selected>Sélectionnez votre pays</option>
-                                            <option value="Cameroun" data-prefix="+237" data-flag="🇨🇲">🇨🇲 Cameroun
+                                            <option value="Cameroun" data-prefix="+237" data-flag="🇨🇲"
+                                                data-currency="XAF">🇨🇲 Cameroun
                                             </option>
-                                            <option value="Burkina Faso" data-prefix="+226" data-flag="🇧🇫">🇧🇫
+                                            <option value="Burkina Faso" data-prefix="+226" data-flag="🇧🇫"
+                                                data-currency="XAF">🇧🇫
                                                 Burkina Faso</option>
-                                            <option value="Togo" data-prefix="+228" data-flag="🇹🇬">🇹🇬 Togo</option>
-                                            <option value="Côte d'Ivoire" data-prefix="+225" data-flag="🇨🇮">🇨🇮 Côte
+                                            <option value="Togo" data-prefix="+228" data-flag="🇹🇬"
+                                                data-currency="XAF">🇹🇬 Togo</option>
+                                            <option value="Bénin" data-prefix="+229" data-flag="🇧🇯"
+                                                data-currency="XAF">🇧🇯 Bénin</option>
+                                            <option value="Côte d'Ivoire" data-prefix="+225" data-flag="🇨🇮"
+                                                data-currency="XAF">🇨🇮 Côte
                                                 d'Ivoire</option>
-                                            <option value="Mali" data-prefix="+223" data-flag="🇲🇱">🇲🇱 Mali</option>
-                                            <option value="Tchad" data-prefix="+235" data-flag="🇹🇩">🇹🇩 Tchad
+                                            <option value="Mali" data-prefix="+223" data-flag="🇲🇱"
+                                                data-currency="XAF">🇲🇱 Mali</option>
+                                            <option value="Tchad" data-prefix="+235" data-flag="🇹🇩"
+                                                data-currency="XAF">🇹🇩 Tchad
                                             </option>
-                                            <option value="Gabon" data-prefix="+241" data-flag="🇬🇦">🇬🇦 Gabon
+                                            <option value="Gabon" data-prefix="+241" data-flag="🇬🇦"
+                                                data-currency="XAF">🇬🇦 Gabon
                                             </option>
-                                            <option value="Sénégal" data-prefix="+221" data-flag="🇸🇳">🇸🇳 Sénégal
+                                            <option value="Sénégal" data-prefix="+221" data-flag="🇸🇳"
+                                                data-currency="XAF">🇸🇳 Sénégal
                                             </option>
-                                            <option value="Congo Brazzaville" data-prefix="+242" data-flag="🇨🇬">🇨🇬
+                                            <option value="Congo Brazzaville" data-prefix="+242" data-flag="🇨🇬"
+                                                data-currency="XAF">🇨🇬
                                                 Congo Brazzaville</option>
+                                            <option value="Congo Kinshasa" data-prefix="+243" data-flag="🇨🇩"
+                                                data-currency="USD">🇨🇩
+                                                Congo Kinshasa</option>
                                         </select>
                                     </div>
                                     <div class="col-md-12 mb-3">
@@ -557,14 +571,53 @@
                 ]
             };
 
-            // Fonction pour mettre à jour le préfixe téléphonique
+            // Fonction pour mettre à jour le préfixe téléphonique et la devise
             window.updatePhonePrefix = function () {
                 const countrySelect = document.getElementById('country');
                 const prefixSpan = document.getElementById('country-prefix');
                 const selectedOption = countrySelect.options[countrySelect.selectedIndex];
 
-                if (selectedOption && selectedOption.dataset.prefix) {
-                    prefixSpan.textContent = selectedOption.dataset.prefix;
+                if (selectedOption) {
+                    // Update Prefix
+                    if (selectedOption.dataset.prefix) {
+                        prefixSpan.textContent = selectedOption.dataset.prefix;
+                    }
+
+                    // Update Currency and Disable the other option
+                    if (selectedOption.dataset.currency) {
+                        const currency = selectedOption.dataset.currency;
+                        const radioXAF = document.getElementById('currencyXAF');
+                        const radioUSD = document.getElementById('currencyUSD');
+
+                        if (currency === 'XAF') {
+                            if (radioXAF) {
+                                radioXAF.checked = true;
+                                radioXAF.disabled = false;
+                                radioXAF.parentElement.classList.remove('opacity-50');
+                            }
+                            if (radioUSD) {
+                                radioUSD.checked = false;
+                                radioUSD.disabled = true;
+                                radioUSD.parentElement.classList.add('opacity-50');
+                            }
+                        } else if (currency === 'USD') {
+                            if (radioUSD) {
+                                radioUSD.checked = true;
+                                radioUSD.disabled = false;
+                                radioUSD.parentElement.classList.remove('opacity-50');
+                            }
+                            if (radioXAF) {
+                                radioXAF.checked = false;
+                                radioXAF.disabled = true;
+                                radioXAF.parentElement.classList.add('opacity-50');
+                            }
+                        }
+
+                        // Trigger amount update
+                        if (typeof window.updateAmounts === 'function') {
+                            window.updateAmounts();
+                        }
+                    }
                 }
             };
 
