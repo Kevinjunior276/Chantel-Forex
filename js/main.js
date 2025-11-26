@@ -2,68 +2,67 @@
     "use strict";
 
     // Options d'investissement
-       const fcfa24hOptions = [
-        { amount: 20000, rendement: 90000 },
-        { amount: 30000, rendement: 140000 },
-        { amount: 40000, rendement: 180000 },
-        { amount: 50000, rendement: 220000 },
-        { amount: 80000, rendement: 340000 },
-        { amount: 100000, rendement: 420000 },
-        { amount: 150000, rendement: 670000 },
-        { amount: 200000, rendement: 870000 },
-        { amount: 250000, rendement: 1300000 },
-        { amount: 300000, rendement: 1500000 },
-        { amount: 350000, rendement: 2000000 }
-    ];
-
-    const fcfa48hOptions = [
-        { amount: 20000, rendement: 150000 },
-        { amount: 30000, rendement: 230000 },
-        { amount: 40000, rendement: 310000 },
-        { amount: 50000, rendement: 380000 },
-        { amount: 80000, rendement: 430000 },
-        { amount: 100000, rendement: 500000 },
-        { amount: 150000, rendement: 690000 },
-        { amount: 200000, rendement: 910000 },
-        { amount: 250000, rendement: 1370000 },
-        { amount: 300000, rendement: 1500000 },
-        { amount: 350000, rendement: 2500000 }
-    ];
+    const investmentOptions = {
+        XAF: [
+            { amount: 20000, return: 270000 },
+            { amount: 50000, return: 350000 },
+            { amount: 80000, return: 560000 },
+            { amount: 100000, return: 750000 },
+            { amount: 150000, return: 900000 },
+            { amount: 200000, return: 1000000 },
+            { amount: 300000, return: 1600000 },
+            { amount: 500000, return: 2200000 },
+            { amount: 800000, return: 3100000 }
+        ],
+        USD: [
+            { amount: 50, return: 350 },
+            { amount: 60, return: 430 },
+            { amount: 100, return: 825 },
+            { amount: 150, return: 1350 },
+            { amount: 250, return: 1825 },
+            { amount: 350, return: 2350 },
+            { amount: 500, return: 3450 },
+            { amount: 1000, return: 5975 }
+        ]
+    };
 
     // Fonction pour mettre à jour le préfixe téléphonique et le modèle de validation
     function updatePhonePrefix() {
         const countrySelect = document.getElementById('country');
         const phoneInput = document.getElementById('phone');
         const prefixSpan = document.getElementById('country-prefix');
+        if (!countrySelect) return;
         const selectedOption = countrySelect.options[countrySelect.selectedIndex];
         
-        if (selectedOption.dataset.prefix) {
+        if (selectedOption && selectedOption.dataset.prefix) {
             const prefix = selectedOption.dataset.prefix;
-            prefixSpan.textContent = prefix;
+            if (prefixSpan) prefixSpan.textContent = prefix;
             
             // Mettre à jour le modèle de validation en fonction du pays
             const country = selectedOption.value;
             
             // Mettre à jour le placeholder avec l'exemple de numéro
             const example = getPhoneExample(country);
-            phoneInput.title = `Format attendu: ${prefix} ${example}`;
-            phoneInput.placeholder = `Ex: ${example}`;
-            
-            // Mettre à jour le texte d'aide
-            const helpText = phoneInput.nextElementSibling;
-            if (helpText && helpText.classList.contains('form-text')) {
-                helpText.textContent = `Exemple: ${example}`;
+            if (phoneInput) {
+                phoneInput.title = `Format attendu: ${prefix} ${example}`;
+                phoneInput.placeholder = `Ex: ${example}`;
+                
+                // Mettre à jour le texte d'aide
+                const helpText = phoneInput.nextElementSibling;
+                if (helpText && helpText.classList.contains('form-text')) {
+                    helpText.textContent = `Exemple: ${example}`;
+                }
+                
+                // Réinitialiser les classes de validation
+                phoneInput.classList.remove('is-valid', 'is-invalid');
+                
+                // Déclencher la validation si un numéro est déjà saisi
+                if (phoneInput.value) {
+                    const event = new Event('input');
+                    phoneInput.dispatchEvent(event);
+                }
             }
-            
-            // Réinitialiser les classes de validation
-            phoneInput.classList.remove('is-valid', 'is-invalid');
-            
-            // Déclencher la validation si un numéro est déjà saisi
-            if (phoneInput.value) {
-                const event = new Event('input');
-                phoneInput.dispatchEvent(event);
-            }
-        } else {
+        } else if (phoneInput) {
             // Si aucun pays n'est sélectionné, réinitialiser les champs
             phoneInput.value = '';
             phoneInput.placeholder = 'Sélectionnez d\'abord un pays';
@@ -119,35 +118,38 @@
     }
 
     // Valider le numéro de téléphone lors de la saisie
-    document.getElementById('phone').addEventListener('input', function(e) {
-        const phoneInput = e.target;
-        const countrySelect = document.getElementById('country');
-        const selectedOption = countrySelect.options[countrySelect.selectedIndex];
-        
-        if (!selectedOption.dataset.prefix) {
-            phoneInput.setCustomValidity('Veuillez d\'abord sélectionner un pays');
-            return;
-        }
-        
-        const country = selectedOption.value;
-        const phoneNumber = phoneInput.value;
-        
-        if (validatePhoneNumber(phoneNumber, country)) {
-            phoneInput.setCustomValidity('');
-            phoneInput.classList.remove('is-invalid');
-            phoneInput.classList.add('is-valid');
-        } else {
-            phoneInput.setCustomValidity('Format de numéro invalide pour ' + country);
-            phoneInput.classList.remove('is-valid');
-            phoneInput.classList.add('is-invalid');
-        }
-        
-        // Mettre à jour l'affichage de l'aide
-        const helpText = phoneInput.nextElementSibling;
-        if (helpText && helpText.classList.contains('form-text')) {
-            helpText.textContent = `Exemple: ${getPhoneExample(country)}`;
-        }
-    });
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            const phoneInput = e.target;
+            const countrySelect = document.getElementById('country');
+            const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+            
+            if (!selectedOption.dataset.prefix) {
+                phoneInput.setCustomValidity('Veuillez d\'abord sélectionner un pays');
+                return;
+            }
+            
+            const country = selectedOption.value;
+            const phoneNumber = phoneInput.value;
+            
+            if (validatePhoneNumber(phoneNumber, country)) {
+                phoneInput.setCustomValidity('');
+                phoneInput.classList.remove('is-invalid');
+                phoneInput.classList.add('is-valid');
+            } else {
+                phoneInput.setCustomValidity('Format de numéro invalide pour ' + country);
+                phoneInput.classList.remove('is-valid');
+                phoneInput.classList.add('is-invalid');
+            }
+            
+            // Mettre à jour l'affichage de l'aide
+            const helpText = phoneInput.nextElementSibling;
+            if (helpText && helpText.classList.contains('form-text')) {
+                helpText.textContent = `Exemple: ${getPhoneExample(country)}`;
+            }
+        });
+    }
 
     // Fonction pour formater les nombres avec des espaces
     function formatNumber(num) {
@@ -156,22 +158,27 @@
 
     // Fonction pour mettre à jour les calculs
     function updateCalculations() {
-        const amount = parseInt(document.getElementById('amount').value) || 0;
-        const duration = document.querySelector('input[name="duration"]:checked').value;
+        const amountSelect = document.getElementById('amount');
+        if (!amountSelect) return;
         
-        let rendement = 0;
-        const options = duration === '24h' ? fcfa24hOptions : fcfa48hOptions;
+        const amount = parseFloat(amountSelect.value) || 0;
+        const currencyInput = document.querySelector('input[name="currency"]:checked');
+        const currency = currencyInput ? currencyInput.value : 'XAF';
+        const symbol = currency === 'XAF' ? 'FCFA' : '$';
+        
+        if (amount === 0) return;
+
+        const options = investmentOptions[currency];
         const selectedOption = options.find(opt => opt.amount === amount);
         
         if (selectedOption) {
-            rendement = selectedOption.rendement;
+            const total = selectedOption.return;
+            const profit = total - amount;
+
+            document.getElementById('investedAmount').textContent = formatNumber(amount) + ' ' + symbol;
+            document.getElementById('estimatedProfit').textContent = formatNumber(profit) + ' ' + symbol;
+            document.getElementById('totalReturn').textContent = formatNumber(total) + ' ' + symbol;
         }
-        
-        const profit = rendement - amount;
-        
-        document.getElementById('investedAmount').textContent = formatNumber(amount) + ' FCFA';
-        document.getElementById('estimatedProfit').textContent = formatNumber(profit) + ' FCFA';
-        document.getElementById('totalReturn').textContent = formatNumber(rendement) + ' FCFA';
     }
 
     // Initialiser la validation au chargement de la page
@@ -187,15 +194,18 @@
         }
         
         // Initialiser les calculs d'investissement si la page contient ces éléments
-        if (document.getElementById('amount') && document.querySelector('input[name="duration"]')) {
-            updateCalculations();
+        if (document.getElementById('amount')) {
+            // Wait for inline script to populate amounts if needed, or just attach listeners
+            // Since inline script handles population, we just attach listeners for calculation updates
+            // But inline script ALSO handles calculation. 
+            // We'll attach it anyway as a fallback or parallel update.
             
-            // Ajouter les écouteurs d'événements pour les champs d'investissement
-            document.querySelectorAll('input[name="duration"]').forEach(radio => {
-                radio.addEventListener('change', updateCalculations);
-            });
-
             document.getElementById('amount').addEventListener('change', updateCalculations);
+            
+            const currencyInputs = document.querySelectorAll('input[name="currency"]');
+            currencyInputs.forEach(input => {
+                input.addEventListener('change', updateCalculations);
+            });
         }
     });
 
